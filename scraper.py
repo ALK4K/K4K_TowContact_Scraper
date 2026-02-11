@@ -241,7 +241,7 @@ class ScrapMonsterScraper:
         
         self.listings = all_listings
         print(f"\n{'=' * 60}")
-        print(f"Pagination complete! Total pages scraped: {page - 1 if page_listings else page}")
+        print(f"Pagination complete! Total pages scraped: {page if all_listings else 0}")
         print(f"Total listings collected: {len(all_listings)}")
         print(f"{'=' * 60}")
         
