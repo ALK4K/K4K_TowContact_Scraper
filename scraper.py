@@ -193,11 +193,13 @@ class ScrapMonsterScraper:
             max_pages: Optional maximum number of pages to scrape. If None, scrapes all available pages.
         
         Returns:
-            List of all listing dictionaries from all pages
+            List of all listing dictionaries from all pages (with duplicates removed)
         """
         all_listings = []
+        seen_entries = set()  # Track unique entries to remove duplicates
         page = 1
         base_url = self.url
+        duplicates_removed = 0
         
         while True:
             # Try different pagination URL patterns
@@ -228,9 +230,24 @@ class ScrapMonsterScraper:
                 print(f"No listings found on page {page}. Reached end of pagination.")
                 break
             
-            # Add listings to our collection
-            all_listings.extend(page_listings)
-            print(f"Total listings so far: {len(all_listings)}")
+            # Add listings to our collection, removing duplicates
+            for listing in page_listings:
+                # Create unique key from company name and address
+                # Use normalized (lowercase, stripped) values for comparison
+                company = listing.get('Company', '').strip().lower()
+                address = listing.get('Address', '').strip().lower()
+                unique_key = (company, address)
+                
+                # Only add if we haven't seen this combination before
+                if unique_key not in seen_entries and company:
+                    seen_entries.add(unique_key)
+                    all_listings.append(listing)
+                else:
+                    duplicates_removed += 1
+            
+            print(f"Total unique listings so far: {len(all_listings)}")
+            if duplicates_removed > 0:
+                print(f"Duplicates removed so far: {duplicates_removed}")
             
             # Check if we've hit the max pages limit
             if max_pages and page >= max_pages:
@@ -242,7 +259,9 @@ class ScrapMonsterScraper:
         self.listings = all_listings
         print(f"\n{'=' * 60}")
         print(f"Pagination complete! Total pages scraped: {page if all_listings else 0}")
-        print(f"Total listings collected: {len(all_listings)}")
+        print(f"Total unique listings collected: {len(all_listings)}")
+        if duplicates_removed > 0:
+            print(f"Total duplicates removed: {duplicates_removed}")
         print(f"{'=' * 60}")
         
         return all_listings
@@ -312,6 +331,7 @@ def main():
     print("=" * 60)
     print("ScrapMonster Automotive Yard Scraper")
     print("Scraping ALL pages with pagination support")
+    print("Removing duplicates based on company name and address")
     print("=" * 60)
     
     scraper = ScrapMonsterScraper(url)

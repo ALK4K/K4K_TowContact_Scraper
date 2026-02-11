@@ -6,6 +6,7 @@ K4K Python scraper to collect tow company contacts across US and CA.
 
 - Scrapes automotive yard listings from ScrapMonster
 - **Automatic pagination support** - loops through all pages to collect all scrapyards
+- **Duplicate removal** - automatically removes duplicate entries based on company name and address
 - Extracts Company, Location, YardBrief, and Address information
 - Error handling for missing fields
 - Exports data to Excel (.xlsx) format with formatted headers
@@ -33,7 +34,7 @@ python scraper.py
 This will scrape automotive yard listings from:
 `https://www.scrapmonster.com/scrap-yard/material/automotive/746`
 
-**The scraper will automatically loop through all pages** and collect all available scrapyard listings.
+**The scraper will automatically loop through all pages** and collect all available scrapyard listings. Duplicates are automatically removed based on company name and address.
 
 The output will be saved to `automotive_yards.xlsx` in the current directory.
 
