@@ -236,10 +236,16 @@ class ScrapMonsterScraper:
                 # Use normalized (lowercase, stripped) values for comparison
                 company = listing.get('Company', '').strip().lower()
                 address = listing.get('Address', '').strip().lower()
+                
+                # Skip listings without a company name
+                if not company:
+                    continue
+                
+                # Create unique key (address can be empty, but we still track it)
                 unique_key = (company, address)
                 
                 # Only add if we haven't seen this combination before
-                if unique_key not in seen_entries and company:
+                if unique_key not in seen_entries:
                     seen_entries.add(unique_key)
                     all_listings.append(listing)
                 else:
