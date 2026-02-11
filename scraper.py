@@ -194,6 +194,11 @@ class ScrapMonsterScraper:
         
         Returns:
             List of all listing dictionaries from all pages (with duplicates removed)
+            
+        Note:
+            Duplicate detection is case-insensitive (based on normalized company name and address),
+            but original casing is preserved in the output. The first encountered instance of a
+            duplicate set is kept.
         """
         all_listings = []
         seen_entries = set()  # Track unique entries to remove duplicates
