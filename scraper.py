@@ -185,6 +185,68 @@ class ScrapMonsterScraper:
         self.listings = self.extract_listings(soup)
         return self.listings
     
+    def scrape_all_pages(self, max_pages: Optional[int] = None) -> List[Dict[str, str]]:
+        """
+        Scrape multiple pages with pagination support.
+        
+        Args:
+            max_pages: Optional maximum number of pages to scrape. If None, scrapes all available pages.
+        
+        Returns:
+            List of all listing dictionaries from all pages
+        """
+        all_listings = []
+        page = 1
+        base_url = self.url
+        
+        while True:
+            # Try different pagination URL patterns
+            # Pattern 1: ?page=N
+            if '?' in base_url:
+                paginated_url = f"{base_url}&page={page}"
+            else:
+                paginated_url = f"{base_url}?page={page}"
+            
+            # Update URL for this page
+            self.url = paginated_url
+            
+            print(f"\n{'=' * 60}")
+            print(f"Scraping Page {page}")
+            print(f"{'=' * 60}")
+            
+            # Fetch and parse page
+            soup = self.fetch_page()
+            if not soup:
+                print(f"Failed to fetch page {page}. Stopping pagination.")
+                break
+            
+            # Extract listings from this page
+            page_listings = self.extract_listings(soup)
+            
+            # If no listings found, we've reached the end
+            if not page_listings:
+                print(f"No listings found on page {page}. Reached end of pagination.")
+                break
+            
+            # Add listings to our collection
+            all_listings.extend(page_listings)
+            print(f"Total listings so far: {len(all_listings)}")
+            
+            # Check if we've hit the max pages limit
+            if max_pages and page >= max_pages:
+                print(f"Reached maximum page limit: {max_pages}")
+                break
+            
+            page += 1
+        
+        self.listings = all_listings
+        print(f"\n{'=' * 60}")
+        print(f"Pagination complete! Total pages scraped: {page if all_listings else 0}")
+        print(f"Total listings collected: {len(all_listings)}")
+        print(f"{'=' * 60}")
+        
+        return all_listings
+    
     def export_to_excel(self, filename: str = 'automotive_yards.xlsx'):
         """
         Export scraped data to Excel file.
@@ -249,14 +311,17 @@ def main():
     
     print("=" * 60)
     print("ScrapMonster Automotive Yard Scraper")
+    print("Scraping ALL pages with pagination support")
     print("=" * 60)
     
     scraper = ScrapMonsterScraper(url)
-    listings = scraper.scrape()
+    
+    # Scrape all pages (set max_pages to limit if needed for testing)
+    listings = scraper.scrape_all_pages()
     
     if listings:
         scraper.export_to_excel('automotive_yards.xlsx')
-        print(f"\n{len(listings)} listings scraped successfully!")
+        print(f"\n✓ {len(listings)} listings scraped successfully from all pages!")
     else:
         print("\nNo listings found or error occurred.", file=sys.stderr)
         sys.exit(1)
